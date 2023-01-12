@@ -22,7 +22,7 @@ const ProductoSchema = Schema({
         default: 0,
     },
     categoria: {
-        type: Schema.type.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: 'Categoria',
         required: true
     },
