@@ -72,7 +72,7 @@ const borrarCategoria = async ( req, res = response ) => {
 
     const { id } = req.params;
     const categoriaBorrada = await Categoria.findByIdAndUpdate( id, { estado: false }, { new: true } )
-        .populate( 'usuario', 'nombre' );;
+        .populate( 'usuario', 'nombre' );
 
     res.json( categoriaBorrada );
 }
