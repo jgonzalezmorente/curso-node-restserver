@@ -1,10 +1,11 @@
 const { response } = require( 'express' );
 const { ObjectId } = require( 'mongoose' ).Types;
 const { Usuario, Categoria, Producto } = require( '../models' );
+const categoria = require('../models/categoria');
 
 const coleccionesPermitidas = [
     'usuarios',
-    'categoria',
+    'categorias',
     'productos',
     'roles',
 ];
@@ -31,7 +32,53 @@ const buscarUsuarios = async( termino = '', res = response ) => {
         results: usuarios
     });
 
+}
 
+const buscarCategorias = async( termino = '', res = response ) => {
+
+    const esMongoId = ObjectId.isValid( termino );
+
+    if ( esMongoId ) {
+        const categoria = await Categoria.findById( termino );
+        return res.json({
+            results: ( categoria ) ? [ categoria ] : []
+        } );
+    }
+
+    const regex = new RegExp( termino, 'i' );
+
+    const categorias = await Categoria.find({
+        nombre: regex,
+        estado: true
+    });
+
+    res.json({
+        results: categorias
+    });
+}
+
+const buscarProductos = async( termino = '', res = response ) => {
+
+    const esMongoId = ObjectId.isValid( termino );
+
+    if ( esMongoId ) {
+        const producto = await Producto.findById( termino ).populate( 'categoria', 'nombre' );
+        return res.json({
+            results: ( producto ) ? [ producto ] : []
+        });
+    }
+
+    const regex = new RegExp( termino, 'i' );
+
+    const productos = await Producto.find({
+        nombre: regex,
+        estado: true
+    }).populate( 'categoria', 'nombre' );
+
+    res.json({
+        results: productos
+    });
+    
 }
 
 const buscar = async ( req, res = response ) => {
@@ -48,24 +95,17 @@ const buscar = async ( req, res = response ) => {
         case 'usuarios':
             await buscarUsuarios( termino, res );
             break;
-        case 'categoria':
+        case 'categorias':
+            await buscarCategorias( termino, res );
             break;
         case 'productos':
+            await buscarProductos( termino, res );
             break;
         default:
             res.status( 500 ).json({
                 msg: 'Se me olvidó hacer esta búsqueda'
             });
     }
-
-
-
-    // res.json({
-    //     msg: 'Buscar...',
-    //     coleccion,
-    //     termino
-    // });
-
 }
 
 
